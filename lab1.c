@@ -147,6 +147,6 @@ void main(void)
 	i=strcspn(address,"\n");
 	address[i]=0;
 	arh(address);
-	read_file();
+	//read_file();
 	exit(0);
 }
