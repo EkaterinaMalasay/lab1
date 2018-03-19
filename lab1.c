@@ -61,7 +61,6 @@ void arh(char *dir)
 		}
 	}
 	write(out, &(k), sizeof(k));
-	printf("%d\n", k);
 	closedir(dp);
 	close(out);
 }
@@ -80,7 +79,7 @@ void read_file(void)
 	lseek(in,-4,SEEK_END);
 	read(in, &k, 4);
 	lseek(in,0,SEEK_SET);
-	printf("k: %d\n", k);
+
 	while(k>0)
 	{
 		for(i = 0;;i++)
@@ -114,39 +113,44 @@ void read_file(void)
 	//unlink("/home/sleepovski/Документы/os/file_name.out");
 }
 
-/*void menu(void)
+void menu(void)
 {
-	char input[1]={0};
+	int input = 0;
+	char address[1024] = {0};
+	int i;
+
 	write(1, "???:\n", 6);
-	read(0,input,1);
-	write(1, input, sizeof(input));
-	printf("%d\n", input);
+	read(0,&input,2);
+	input = input - 2608;
 	switch ( input )
 	{
-		case 1://создание
-			{create(); break;}
-		case 2://вывод
-		{disp(); break;}
+		case 1:
+		{
+			write(1, "Enter the address of the directory:", 35);
+			read(0,address,1024);
+			write(1, address, sizeof(address));
+			i=strcspn(address,"\n");
+			address[i]=0;
+			arh(address);
+			break;
+		}
+		case 2:
+		{
+			printf("case 2\n");
+			//read_file();
+			break;
+		}
 		case 0:
 			return;
 		default:
 			write(1, "Input Error!!!!\n", 17);
 	}
 }
-*/
+
 
 
 void main(void)
 {
-	char address[1024]="/home/sleepovski/test/";
-	int i;
-	//menu();
-	write(1, "Enter the address of the directory:", 35);
-	read(0,address,1024);
-	write(1, address, sizeof(address));
-	i=strcspn(address,"\n");
-	address[i]=0;
-	arh(address);
-	//read_file();
+	menu();
 	exit(0);
 }
