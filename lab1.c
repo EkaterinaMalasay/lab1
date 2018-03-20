@@ -27,16 +27,13 @@ void arh(char *dir)
 	}
 	chdir("..");
 
-	write(1, "Enter the name of the arh:", 26);
+	write(1, "Enter the name of the archive:", 30);
 	read(0,name_out,1024);
-	write(1, name_out, sizeof(name_out));
-
 	k=strcspn(name_out,"\n");
 	name_out[k]=0;
-
 	strcat(name_out,end);
-	printf("%s\n", name_out);
 
+////////////////////////////////////////////////////////////
 	out = open(name_out, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
 	chdir(dir);
 	k=0;
@@ -72,6 +69,7 @@ void read_file(char *dir)
 	char block[1024] = {0};
 	char name[1024] = {0};
 	char name_in[1024]={0};
+	char end[6] = ".zippp";
 	int size;
 	int in,out,i,j;
 	int nread;
@@ -83,13 +81,14 @@ void read_file(char *dir)
 		return;
 	}
 
-	write(1, "Enter the name of the arh:", 26);
+	write(1, "Enter the name of the archive:", 30);
 	read(0,name_in,1024);
-	write(1, name_in, sizeof(name_in));
 	k=strcspn(name_in,"\n");
 	name_in[k]=0;
+	strcat(name_in,end);
 	k=0;
 
+////////////////////////////////////////////////////////
 	in = open(name_in, O_RDONLY);
 	lseek(in,-4,SEEK_END);
 	read(in, &k, 4);
@@ -136,7 +135,10 @@ void menu(void)
 
 	while(input!=0)
 	{
-		write(1, "???:\n", 6);
+		write(1, "1-create archive:\n", 19);
+		write(1, "2-unpacking the archive:\n", 26);
+		write(1, "0-exit:\n", 9);
+		write(1, "Your choise:\n", 14);
 		read(0,&input,2);
 		input = input - 2608;
 		switch ( input )
@@ -145,7 +147,6 @@ void menu(void)
 			{
 				write(1, "Enter the address of the directory:", 35);
 				read(0,address,1024);
-				write(1, address, sizeof(address));
 				i=strcspn(address,"\n");
 				address[i]=0;
 				arh(address);
@@ -155,7 +156,6 @@ void menu(void)
 			{
 				write(1, "Enter the address of the directory:", 35);
 				read(0,address,1024);
-				write(1, address, sizeof(address));
 				i=strcspn(address,"\n");
 				address[i]=0;
 				read_file(address);
@@ -166,10 +166,9 @@ void menu(void)
 			default:
 				write(1, "Input Error!!!!\n", 17);
 		}
+		memset(address,0,1024);
 	}
 }
-
-
 
 void main(void)
 {
