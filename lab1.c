@@ -7,14 +7,15 @@
 #include <stdio.h>
 #include <string.h>
 
-void arh(char *dir)
+#define N 1024
+#define E 6
+
+void arh(char *dir, char *name_arch)
 {
 	DIR *dp;
 	struct dirent *entry;
 	struct stat statbuf;
-	char block[1024];
-	char name_out[1024]={0};
-	char end[6] = ".zippp";
+	char block[N];
 	int size;
 	int out,in;
 	int nread;
@@ -25,16 +26,9 @@ void arh(char *dir)
 		fprintf(stderr, "cannot open directory: %s\n", dir);
 		return;
 	}
+
 	chdir("..");
-
-	write(1, "Enter the name of the archive:", 30);
-	read(0,name_out,1024);
-	k=strcspn(name_out,"\n");
-	name_out[k]=0;
-	strcat(name_out,end);
-
-////////////////////////////////////////////////////////////
-	out = open(name_out, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
+	out = open(name_arch, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
 	chdir(dir);
 	k=0;
 	while((entry = readdir(dp)) != NULL)
@@ -42,7 +36,7 @@ void arh(char *dir)
 		lstat(entry->d_name, &statbuf);
 		if (S_ISREG(statbuf.st_mode))
 		{
-			if(strcmp(name_out, entry->d_name) != 0)
+			if(strcmp(name_arch, entry->d_name) != 0)
 			{
 				size = statbuf.st_size;
 				write(out, entry->d_name, strlen(entry->d_name));
@@ -63,15 +57,13 @@ void arh(char *dir)
 }
 
 
-void read_file(char *dir)
+void read_file(char *dir, char *name_arch)
 {
 	DIR *dp;
-	char block[1024] = {0};
-	char name[1024] = {0};
-	char name_in[1024]={0};
-	char end[6] = ".zippp";
+	char block[N] = {0};
+	char name[N] = {0};
 	int size;
-	int in,out,i,j;
+	int in,out,i;
 	int nread;
 	int k = 0;
 
@@ -81,15 +73,8 @@ void read_file(char *dir)
 		return;
 	}
 
-	write(1, "Enter the name of the archive:", 30);
-	read(0,name_in,1024);
-	k=strcspn(name_in,"\n");
-	name_in[k]=0;
-	strcat(name_in,end);
-	k=0;
-
 ////////////////////////////////////////////////////////
-	in = open(name_in, O_RDONLY);
+	in = open(name_arch, O_RDONLY);
 	lseek(in,-4,SEEK_END);
 	read(in, &k, 4);
 	lseek(in,0,SEEK_SET);
@@ -118,26 +103,54 @@ void read_file(char *dir)
 		nread = read(in, block, size);
 		write(out, block, nread);
 		close(out);
-		memset(name,0,1024);
-		memset(block,0,1024);
+		memset(name,0,N);
+		memset(block,0,N);
 		k--;
 	}
 
 	close(in);
-	unlink(name_in);
+	unlink(name_arch);
+}
+
+char* n_arch(char *name_arch)
+{
+	char end[E] = ".zippp";
+	int k = 0;
+
+	write(1, "Enter the name of the archive: ", 31);
+	read(0,name_arch,N);
+	k=strcspn(name_arch,"\n");
+	name_arch[k]=0;
+	strcat(name_arch,end);
+	k=0;
+
+	return name_arch;
+}
+
+char* addr(char *address)
+{
+	int i=0;
+
+	write(1, "Enter the address of the directory: ", 36);
+	read(0,address,N);
+	i=strcspn(address,"\n");
+	address[i]=0;
+
+	return address;
 }
 
 void menu(void)
 {
 	int input = 1;
-	char address[1024] = {0};
+	char address[N] = {0};
+	char name_arch[N] = {0};
 	int i;
 
 	while(input!=0)
 	{
-		write(1, "1-create archive:\n", 19);
-		write(1, "2-unpacking the archive:\n", 26);
-		write(1, "0-exit:\n", 9);
+		write(1, "1-create archive\n", 18);
+		write(1, "2-unpacking the archive\n", 25);
+		write(1, "0-exit\n", 8);
 		write(1, "Your choise:\n", 14);
 		read(0,&input,2);
 		input = input - 2608;
@@ -145,20 +158,16 @@ void menu(void)
 		{
 			case 1:
 			{
-				write(1, "Enter the address of the directory:", 35);
-				read(0,address,1024);
-				i=strcspn(address,"\n");
-				address[i]=0;
-				arh(address);
+				addr(address);
+				n_arch(name_arch);
+				arh(address,name_arch);
 				break;
 			}
 			case 2:
 			{
-				write(1, "Enter the address of the directory:", 35);
-				read(0,address,1024);
-				i=strcspn(address,"\n");
-				address[i]=0;
-				read_file(address);
+				addr(address);
+				n_arch(name_arch);
+				read_file(address,name_arch);
 				break;
 			}
 			case 0:
@@ -166,7 +175,8 @@ void menu(void)
 			default:
 				write(1, "Input Error!!!!\n", 17);
 		}
-		memset(address,0,1024);
+		memset(address,0,N);
+		memset(name_arch,0,N);
 	}
 }
 
