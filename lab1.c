@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <dirent.h>
 #include <string.h>
@@ -67,6 +68,8 @@ void read_file(char *dir, char *name_arch)
 	DIR *dp;
 	char block[N] = {0};
 	char name[N] = {0};
+	char name_f[N] = {0};
+	char dir_copy[N] = {0};
 	int size;
 	int in, out, i;
 	int nread;
@@ -81,10 +84,20 @@ void read_file(char *dir, char *name_arch)
 
 ////////////////////////////////////////////////////////
 	in = open(name_arch, O_RDONLY);
+
+	write(1, "Enter the name of the folder: ", 30);
+	read(0, name_f, N);
+	k = strcspn(name_f, "\n");
+	name_f[k] = 0;
+	strcat(dir_copy, dir);
+	strcat(dir_copy, name_f);
+	k = 0;
+	mkdir(dir_copy, O_CREAT|0600);
+	chdir(dir_copy);
+
 	lseek(in, -4, SEEK_END);
 	read(in, &k, 4);
 	lseek(in, 0, SEEK_SET);
-
 	while (k > 0) {
 		for (i = 0; ; i++) {
 			nread = read(in, block, 1);
@@ -109,7 +122,7 @@ void read_file(char *dir, char *name_arch)
 		memset(block, 0, N);
 		k--;
 	}
-
+	chdir("..");
 	close(in);
 	unlink(name_arch);
 }
