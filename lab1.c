@@ -26,7 +26,6 @@ void arh(char *dir, char *name_arch)
 	dp = opendir(dir);
 	if (dp == NULL) {
 		fprintf(stderr, "cannot open directory: %s\n", dir);
-		return;
 	}
 
 	chdir("..");
@@ -34,7 +33,7 @@ void arh(char *dir, char *name_arch)
 	chdir(dir);
 	k = 0;
 
-	write(1, "Delete? [1/0]:\n", 15);
+	write(1, "Delete files after archiving? [1/0]:\n", 37);
 	read(0, &del, 2);
 	del = del - 2608;
 
@@ -74,6 +73,7 @@ void read_file(char *dir, char *name_arch)
 	int in, out, i;
 	int nread;
 	int k = 0;
+	int del = 0;
 
 	chdir(dir);
 	dp = opendir(dir);
@@ -123,8 +123,14 @@ void read_file(char *dir, char *name_arch)
 		k--;
 	}
 	chdir("..");
+	closedir(dp);
 	close(in);
-	unlink(name_arch);
+
+	write(1, "Delete archive? [1/0]:\n", 23);
+	read(0, &del, 2);
+	del = del - 2608;
+	if (del == 1)
+		unlink(name_arch);
 }
 
 char *n_arch(char *name_arch)
