@@ -10,7 +10,7 @@
 #define N 1024
 #define E 6
 
-void arh(char *dir, char *name_arch)
+int arh(char *dir, char *name_arch)
 {
 	DIR *dp;
 	struct dirent *entry;
@@ -26,10 +26,15 @@ void arh(char *dir, char *name_arch)
 	dp = opendir(dir);
 	if (dp == NULL) {
 		fprintf(stderr, "cannot open directory: %s\n", dir);
+		return -1;
 	}
-
+	closedir(dp);
 	chdir("..");
 	out = open(name_arch, O_WRONLY|O_CREAT, 0600);
+	if (out == -1) {
+		fprintf(stderr, "cannot open file: %s\n", name_arch);
+		return -1;
+	}
 	chdir(dir);
 	k = 0;
 
@@ -47,6 +52,12 @@ void arh(char *dir, char *name_arch)
 				write(out, "/", 1);
 				write(out, &(size), sizeof(size));
 				in = open(entry->d_name, O_RDONLY);
+					if (in == -1) {
+						fprintf(stderr,
+							"cannot open file: %s\n",
+							entry->d_name);
+						return -1;
+					}
 				while ((nread = read(in, block, sizeof(block)))
 									 > 0)
 					write(out, block, nread);
@@ -58,11 +69,11 @@ void arh(char *dir, char *name_arch)
 		}
 	}
 	write(out, &(k), sizeof(k));
-	closedir(dp);
 	close(out);
+	return 0;
 }
 
-void read_file(char *dir, char *name_arch)
+int read_file(char *dir, char *name_arch)
 {
 	DIR *dp;
 	char block[N] = {0};
@@ -81,9 +92,13 @@ void read_file(char *dir, char *name_arch)
 		fprintf(stderr, "cannot open directory: %s\n", dir);
 		return;
 	}
+	closedir(dp);
 
-////////////////////////////////////////////////////////
 	in = open(name_arch, O_RDONLY);
+	if (in == -1) {
+		fprintf(stderr, "cannot open file: %s\n", name_arch);
+		return -1;
+	}
 
 	write(1, "Enter the name of the folder: ", 30);
 	read(0, name_f, N);
@@ -106,6 +121,10 @@ void read_file(char *dir, char *name_arch)
 			name[i] = block[0];
 		}
 		out = open(name, O_WRONLY|O_CREAT|O_APPEND, 0600);
+		if (in == -1) {
+			fprintf(stderr, "cannot open file: %s\n", name);
+			return -1;
+		}
 
 		read(in, &size, 4);
 		if (size > sizeof(block)) {
@@ -123,14 +142,14 @@ void read_file(char *dir, char *name_arch)
 		k--;
 	}
 	chdir("..");
-	closedir(dp);
-	close(in);
 
 	write(1, "Delete archive? [1/0]:\n", 23);
 	read(0, &del, 2);
 	del = del - 2608;
 	if (del == 1)
 		unlink(name_arch);
+	close(in);
+	return 0;
 }
 
 char *n_arch(char *name_arch)
