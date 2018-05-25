@@ -28,7 +28,7 @@ int arh(char *dir, char *name_arch)
 		fprintf(stderr, "cannot open directory: %s\n", dir);
 		return -1;
 	}
-	//closedir(dp);
+
 	chdir("..");
 	out = open(name_arch, O_WRONLY|O_CREAT, 0600);
 	if (out == -1) {
@@ -70,6 +70,7 @@ int arh(char *dir, char *name_arch)
 	}
 	write(out, &(k), sizeof(k));
 	close(out);
+	closedir(dp);
 	return 0;
 }
 
