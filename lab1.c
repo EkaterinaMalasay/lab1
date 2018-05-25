@@ -28,7 +28,7 @@ int arh(char *dir, char *name_arch)
 		fprintf(stderr, "cannot open directory: %s\n", dir);
 		return -1;
 	}
-	closedir(dp);
+	//closedir(dp);
 	chdir("..");
 	out = open(name_arch, O_WRONLY|O_CREAT, 0600);
 	if (out == -1) {
@@ -154,7 +154,7 @@ int read_file(char *dir, char *name_arch)
 
 char *n_arch(char *name_arch)
 {
-	char end[E] = ".zippp";
+	char end[E+1] = ".zippp";
 	int k = 0;
 
 	write(1, "Enter the name of the archive: ", 31);
